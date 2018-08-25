@@ -934,11 +934,12 @@ hunting_zones:
   - 266
   # https://elanthipedia.play.net/Young_Ogre                              80-120
   young_ogres_riverhaven:
+  - 8600
   - 8601
   - 8602
-  - 12368
+  - 8606
   - 8607
-  - 14375
+  - 8604
   - 8605
   - 8603
   - 8608
