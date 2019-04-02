@@ -1,0 +1,47 @@
+=begin
+  Documentation: https://elanthipedia.play.net/Lich_script_repository#mef
+=end
+
+custom_require.call(%w[common])
+
+class Mef
+  include DRC
+
+  def initialize
+    UserVars.mef_last_use ||= Time.now - 1800
+    @no_use_scripts = get_settings.mef_no_use_scripts
+
+    passive_loop
+  end
+
+  def use_mef
+    return if Time.now - UserVars.mef_last_use < 1800
+    return if @no_use_scripts.any? { |name| Script.running?(name) }
+    return if XMLData.room_title.include? 'Carousel Chamber'
+    return if hidden?
+
+    Script.running.find_all { |s| !s.paused? && !s.no_pause_all && s.name != 'mef2' }.each(&:pause)
+    waitrt?
+    bput('stow left', 'Stow what', 'You put') if checkleft
+    case bput('get my other branch', 'You get', 'What were')
+    when 'What were'
+      echo('branch not found, exiting.')
+      Script.running.find_all { |s| s.paused? && !s.no_pause_all && s.name != 'mef2' }.each(&:unpause)
+      exit
+    end
+    bput('rub my bloodwood branch', 'The world around you seems to slow as the spell grips your mind.', 'The branch remains inert.')
+    waitrt?
+    bput('stow bloodwood branch', 'You put', 'Stow what')
+    UserVars.mef_last_use = Time.now
+    Script.running.find_all { |s| s.paused? && !s.no_pause_all && s.name != 'mef2' }.each(&:unpause)
+  end
+
+  def passive_loop
+    loop do
+      use_mef
+      pause 20
+    end
+  end
+end
+
+Mef.new
